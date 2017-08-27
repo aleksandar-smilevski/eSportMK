@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\eSportMK.Data\eSportMK.Data.csproj" />
+    <ProjectReference Include="..\eSportMK.Dto\eSportMK.Dto.csproj" />
+    <ProjectReference Include="..\eSportMK.Repository\eSportMK.Repository.csproj" />
+  </ItemGroup>
+
+</Project>
