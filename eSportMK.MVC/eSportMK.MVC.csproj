@@ -21,15 +21,8 @@
     <Content Include="wwwroot\adminapp\views\teams\list.html" />
     <Content Include="wwwroot\adminapp\views\users\detail.html" />
     <Content Include="wwwroot\adminapp\views\users\list.html" />
-    <Content Include="wwwroot\app.js" />
     <Content Include="wwwroot\images\match.svg" />
     <Content Include="wwwroot\images\result.svg" />
-    <Content Include="wwwroot\js\admin.controllers.js" />
-    <Content Include="wwwroot\js\controllers.js" />
-    <Content Include="wwwroot\js\testapp.js" />
-    <Content Include="wwwroot\testapp.js" />
-    <Content Include="wwwroot\views\admin.html" />
-    <Content Include="wwwroot\views\home.html" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="bootstrap" Version="4.0.0-beta" />
@@ -59,8 +52,6 @@
     <Folder Include="Areas\Controllers\" />
     <Folder Include="Areas\Models\" />
     <Folder Include="Areas\NewFolder\" />
-    <Folder Include="wwwroot\adminapp\teams\" />
-    <Folder Include="wwwroot\app\" />
   </ItemGroup>
 
 </Project>
