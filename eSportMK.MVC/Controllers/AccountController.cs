@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using eSportMK.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using eSportMK.MVC.Models.AccountViewModels;
 using eSportMK.MVC.Services;
+using eSportMK.MVC.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace eSportMK.MVC.Controllers
 {
@@ -20,15 +21,16 @@ namespace eSportMK.MVC.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
-        public int y;
         private readonly ILogger _logger;
         private readonly string _externalCookieScheme;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager,
             IOptions<IdentityCookieOptions> identityCookieOptions,
             IEmailSender emailSender,
             ISmsSender smsSender,
@@ -36,6 +38,7 @@ namespace eSportMK.MVC.Controllers
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
             _emailSender = emailSender;
             _smsSender = smsSender;
@@ -71,6 +74,16 @@ namespace eSportMK.MVC.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(1, "User logged in.");
+                    var user = _userManager.Users.Where(x => x.Email == model.Email).FirstOrDefault();
+                    var userRoles = await _userManager.GetRolesAsync(user);
+
+                    await _signInManager.SignInAsync(user, model.RememberMe);
+
+                    var isAdmin = userRoles.Contains("Admin");
+                    if (isAdmin)
+                    {
+                        return RedirectToAction("Index", "Admin");
+                    }
                     return RedirectToLocal(returnUrl);
                 }
                 if (result.RequiresTwoFactor)

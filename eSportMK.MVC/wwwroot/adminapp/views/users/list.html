@@ -1,0 +1,19 @@
+﻿<div ng-controller="UsersListController as vm">
+    <div class="col-lg-12">
+        <table class="table table-stripped table-condensed">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Id</th>
+                <th></th>
+            </tr>
+     
+            <tr ng-repeat="e in vm.entities">
+                <td>{{e.userName}}</td>
+                <td>{{e.email}}</td>
+                <td>{{e.id}}</td>
+                <td><a href="#!/users/details/{{e.id}}">More</a></td>
+            </tr>
+        </table>
+    </div>
+ </div>
