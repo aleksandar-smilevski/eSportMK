@@ -117,26 +117,26 @@ namespace eSportMK.MVC.API
         //    return CreatedAtAction("GetApplicationUser", new { id = applicationUser.Id }, applicationUser);
         //}
 
-        //// DELETE: api/Users/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteApplicationUser([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // DELETE: api/Users/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteApplicationUser([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    var applicationUser = await _context.ApplicationUser.SingleOrDefaultAsync(m => m.Id == id);
-        //    if (applicationUser == null)
-        //    {
-        //        return NotFound();
-        //    }
+            var applicationUser = await _repo.GetByIdAsync<ApplicationUser>(id);
+            if (!applicationUser.Success)
+            {
+                return NotFound();
+            }
 
-        //    _context.ApplicationUser.Remove(applicationUser);
-        //    await _context.SaveChangesAsync();
+            _repo.Delete<ApplicationUser>(id);
+            await _repo.SaveAsync();
 
-        //    return Ok(applicationUser);
-        //}
+            return Ok(true);
+        }
 
         //private bool ApplicationUserExists(string id)
         //{

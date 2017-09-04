@@ -8,9 +8,10 @@ using eSportMK.MVC.Models;
 namespace eSportMK.MVC.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170904170102_Added Countries")]
+    partial class AddedCountries
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")
@@ -151,13 +152,11 @@ namespace eSportMK.MVC.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int?>("CountryId");
+                    b.Property<string>("Country");
 
                     b.Property<DateTime>("DateOfBirth");
 
                     b.Property<string>("FirstName");
-
-                    b.Property<int?>("GameId");
 
                     b.Property<string>("LastName");
 
@@ -166,10 +165,6 @@ namespace eSportMK.MVC.Migrations
                     b.Property<string>("TeamId");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CountryId");
-
-                    b.HasIndex("GameId");
 
                     b.HasIndex("TeamId");
 
@@ -406,14 +401,6 @@ namespace eSportMK.MVC.Migrations
 
             modelBuilder.Entity("eSportMK.MVC.Models.Player", b =>
                 {
-                    b.HasOne("eSportMK.MVC.Models.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryId");
-
-                    b.HasOne("eSportMK.MVC.Models.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId");
-
                     b.HasOne("eSportMK.MVC.Models.Team", "Team")
                         .WithMany("Players")
                         .HasForeignKey("TeamId");
@@ -446,7 +433,7 @@ namespace eSportMK.MVC.Migrations
                         .HasForeignKey("CountryId");
 
                     b.HasOne("eSportMK.MVC.Models.Game", "Game")
-                        .WithMany("Teams")
+                        .WithMany()
                         .HasForeignKey("GameId");
                 });
 

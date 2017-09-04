@@ -10,6 +10,7 @@ using eSportMK.MVC.DTOs.Team;
 using eSportMK.MVC.Models;
 using eSportMK.MVC.DTOs.Country;
 using eSportMK.MVC.DTOs;
+using eSportMK.MVC.DTOs.Player;
 
 namespace eSportMK.MVC.API
 {
@@ -24,37 +25,50 @@ namespace eSportMK.MVC.API
             _repo = repo;
         }
 
+        // ???
         // GET: api/Teams
-        [HttpGet]
-        public IEnumerable<TeamDto> GetTeams()
+        [HttpGet("{gameId:int}")]
+        public async Task<IActionResult> GetTeamsAsync(int? gameId)
         {
-            var response = _repo.GetAll<Team>(null, "Players,Game");
-            if (response.Success)
+            if (gameId == null)
             {
-                var list = response.Data.Select(x => new TeamDto { Name = x.Name, Game = new GameDto { Name = x.Game.Name }, Country = new CountryDto { Name = x.Country.Name}, Players = x.Players.Select(y => new DTOs.Player.PlayerDto { FirstName = y.FirstName, LastName = y.LastName, Country = y.Country }).ToList() }).ToList();
-                return list;
+                return BadRequest();
             }
-            return new List<TeamDto>();
+            var response = await _repo.GetFirstAsync<Game>(x => x.Id.Equals(gameId), null, nameof(Game.Teams));
+            if (!response.Success)
+            {
+                return NotFound();
+            }
+            return Ok(response.Data.Teams.Select(x => new TeamDto { Name = x.Name, Game = new GameDto { Name = x.Game.Name }, Players = 
+                x.Players.Select(y => new PlayerDto { FirstName = y.FirstName, LastName = y.LastName, Nickname = y.Nickname, Country = y.Country.Name }).ToList(), Country = new CountryDto { Name = x.Country.Name } }).ToList());
         }
 
-        //// GET: api/Teams/5
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetTeam([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // GET: api/Teams/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetTeam([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    var team = await _context.Teams.SingleOrDefaultAsync(m => m.Id == id);
+            var team = await _repo.GetOneAsync<Team>(x => x.Id.Equals(id), String.Join(",", new object[] { nameof(Team.Game), nameof(Team.Country), nameof(Team.Players) }));
 
-        //    if (team == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (!team.Success)
+            {
+                return NotFound();
+            }
 
-        //    return Ok(team);
-        //}
+            var teamDto = new TeamDto
+            {
+                Name = team.Data.Name,
+                Game = new GameDto { Name = team.Data.Game.Name, Id = team.Data.Game.Id },
+                Country = new CountryDto { Name = team.Data.Country.Name },
+                Players = team.Data.Players.Select(x => new PlayerDto { FirstName = x.FirstName, LastName = x.LastName, Nickname = x.Nickname, Country = x.Country.Name }).ToList()
+            };
+
+            return Ok(teamDto);
+        }
 
         //// PUT: api/Teams/5
         //[HttpPut("{id}")]
@@ -91,20 +105,28 @@ namespace eSportMK.MVC.API
         //    return NoContent();
         //}
 
-        //// POST: api/Teams
-        //[HttpPost]
-        //public async Task<IActionResult> PostTeam([FromBody] Team team)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // POST: api/Teams
+        [HttpPost]
+        public async Task<IActionResult> PostTeam([FromBody] TeamDto teamDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    _context.Teams.Add(team);
-        //    await _context.SaveChangesAsync();
+            //MAPPING NOT DONE
+            //var team = new Team
+            //{
+            //    Name = teamDto.Name,
+            //    Country = new Country { Name = teamDto.Country.Name, },
+            //    Game = new Game { Name = teamDto.Game.Name, Id = teamDto.Game.Id}
+            //};
 
-        //    return CreatedAtAction("GetTeam", new { id = team.Id }, team);
-        //}
+            //_context.Teams.Add(team);
+            //await _context.SaveChangesAsync();
+
+            return Ok();
+        }
 
         //// DELETE: api/Teams/5
         //[HttpDelete("{id}")]
