@@ -1,12 +1,11 @@
-﻿using eSportMK.Repository.ResponseObject;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
+using eSportMK.MVC.Response;
 
-namespace eSportMK.Repository.BaseRepository
+namespace eSportMK.MVC.Repository.BaseRepository
 {
     public interface IRepository
     {

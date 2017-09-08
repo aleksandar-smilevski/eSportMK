@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using eSportMK.Repository.BaseRepository;
 using eSportMK.MVC.DTOs;
 using eSportMK.MVC.DTOs.Game;
 using eSportMK.MVC.Models;
+using eSportMK.MVC.Repository.BaseRepository;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace eSportMK.MVC
+namespace eSportMK.MVC.API
 {
     [Produces("application/json")]
     [Route("api/games")]
@@ -25,15 +24,22 @@ namespace eSportMK.MVC
 
         // GET: api/Games
         [HttpGet]
-        public IEnumerable<GameDto> GetGames()
+        public async Task<IActionResult> GetGames()
         {
-            var response = _repo.GetAll<Game>();
-            if (response.Success)
+            try
             {
-                var list = response.Data.Select(x => new GameDto { Id = x.Id, Name = x.Name }).ToList();
-                return list;
+                var response = await _repo.GetAllAsync<Game>();
+                if (response.Success)
+                {
+                    var list = response.Data.Select(x => new GameDto {Id = x.Id, Name = x.Name}).ToList();
+                    return Ok(list);
+                }
+                return Ok(new List<GameDto>());
             }
-            return new List<GameDto>();
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         // GET: api/Games/5
@@ -45,20 +51,27 @@ namespace eSportMK.MVC
                 return BadRequest(ModelState);
             }
 
-            var game = await _repo.GetByIdAsync<Game>(id);
-
-            if (!game.Success)
+            try
             {
-                return NotFound();
+                var game = await _repo.GetByIdAsync<Game>(id);
+
+                if (!game.Success)
+                {
+                    return NotFound();
+                }
+
+                var gameDto = new GameDto
+                {
+                    Id = game.Data.Id,
+                    Name = game.Data.Name
+                };
+
+                return Ok(gameDto);
             }
-
-            var gameDto = new GameDto
+            catch (Exception e)
             {
-                Id = game.Data.Id,
-                Name = game.Data.Name
-            };
-
-            return Ok(game);
+                return BadRequest(e.Message);
+            }
         }
 
         // PUT: api/Games/5
@@ -69,35 +82,37 @@ namespace eSportMK.MVC
             {
                 return BadRequest(ModelState);
             }
-            var getGame = await _repo.GetByIdAsync<Game>(gameDto.Id);
-            if (!getGame.Success)
-            {
-                return NotFound();
-            }
-
-            var game = getGame.Data;
-            game.Name = gameDto.Name;
+            
             try
             {
+                var getGame = await _repo.GetByIdAsync<Game>(gameDto.Id);
+                if (!getGame.Success)
+                {
+                    return NotFound();
+                }
+
+                var game = getGame.Data;
+                game.Name = gameDto.Name;
+
                 var update = _repo.Update<Game>(game);
                 if (!update.Success)
                 {
-                    return BadRequest(update.ErrorMessage);
+                    return Ok(false);
                 }
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!GameExists(game.Id))
+                if (!GameExists(gameDto.Id))
                 {
                     return NotFound();
                 }
                 else
                 {
-                    throw;
+                    return BadRequest();
                 }
             }
 
-            return NoContent();
+            return Ok(true);
         }
 
         // POST: api/Games
@@ -108,18 +123,26 @@ namespace eSportMK.MVC
             {
                 return BadRequest(ModelState);
             }
-            var game = new Game
-            {
-                Name = gameDto.Name
-            };
 
-            var creation = _repo.Create<Game>(game);
-            if (!creation.Success)
+            try
             {
-                return BadRequest(creation.ErrorMessage);
+                var game = new Game
+                {
+                    Name = gameDto.Name
+                };
+
+                var creation = _repo.Create<Game>(game);
+                if (!creation.Success)
+                {
+                    return Ok(false);
+                }
+
+                return Ok(true);
             }
-
-            return CreatedAtAction("GetGame", new { id = game.Id }, game);
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
         // DELETE: api/Games/5
@@ -131,19 +154,26 @@ namespace eSportMK.MVC
                 return BadRequest(ModelState);
             }
 
-            var game = await _repo.GetByIdAsync<Game>(id);
-            if (!game.Success)
+            try
             {
-                return NotFound();
-            }
+                var game = await _repo.GetByIdAsync<Game>(id);
+                if (!game.Success)
+                {
+                    return NotFound();
+                }
 
-            var deletion = _repo.Delete<Game>(id);
-            if (!deletion.Success)
+                var deletion = _repo.Delete<Game>(id);
+                if (!deletion.Success)
+                {
+                    return Ok(false);
+                }
+
+                return Ok(true);
+            }
+            catch (Exception e)
             {
-                return BadRequest(deletion.ErrorMessage);
+                return BadRequest(e.Message);
             }
-
-            return Ok(game);
         }
 
         private bool GameExists(int id)

@@ -3,32 +3,34 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace eSportMK.MVC.Database
 {
     public static class DbInitializer
     {
 
-        public static void InitializeAsync(ApplicationDbContext context)
+        public static async Task InitializeAsync(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             try
             {
-                //context.Database.EnsureCreated();
 
-                if (!context.Roles.Any())
+                if (!roleManager.Roles.Any())
                 {
-                    var roles = new IdentityRole[]
-                    {
-                        new IdentityRole("Admin"),
-                        new IdentityRole("User")
-                    };
-                    context.Roles.AddRange(roles);
-                    context.SaveChanges();
+                    await roleManager.CreateAsync(new IdentityRole("Admin"));
+                    await roleManager.CreateAsync(new IdentityRole("User"));
+                }
+
+                if (!userManager.Users.Any())
+                {
+                    var appUser = new ApplicationUser() {UserName = "Admin", Email = "a@a.com"};
+                    var res = await userManager.CreateAsync(appUser, "Admin123!");
+                    res = await userManager.AddToRoleAsync(appUser, "Admin");
                 }
 
                 if (!context.Games.Any())
                 {
-                    var games = new Game[]
+                    var games = new[]
                     {
                         new Game { Name = "Dota 2"},
                         new Game { Name = "CS:GO"},
@@ -42,7 +44,7 @@ namespace eSportMK.MVC.Database
 
                 if (!context.Countries.Any())
                 {
-                    var countries = new Country[]
+                    var countries = new[]
                     {
                         new Country{Name = "Afghanistan"},
                         new Country{Name = "Åland Islands"},
@@ -296,7 +298,7 @@ namespace eSportMK.MVC.Database
 
                 if (!context.Teams.Any())
                 {
-                    var teams = new Team[]
+                    var teams = new[]
                     {
                         new Team { Id = Guid.NewGuid().ToString(), Name = "SK Gaming", Country = context.Countries.FirstOrDefault(x => x.Name.Equals("Brazil")), Game = context.Games.FirstOrDefault(x => x.Name.Equals("CS:GO")) }
                     };
@@ -307,7 +309,7 @@ namespace eSportMK.MVC.Database
 
                 if (!context.Players.Any())
                 {
-                    var players = new Player[]
+                    var players = new[]
                     {
                         new Player { FirstName = "Gabriel", LastName = "Toledo", Nickname = "FalleN", DateOfBirth = new DateTime(1991,5,30),
                             Country = context.Countries.FirstOrDefault(x => x.Name.Equals("Brazil")),

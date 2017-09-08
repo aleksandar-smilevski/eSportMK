@@ -11,6 +11,8 @@ namespace eSportMK.MVC.DTOs.Team
     public class TeamDto
     {
         [Required]
+        public string Id { get; set; }
+        [Required]
         public string Name { get; set; }
         public CountryDto Country { get; set; }
         [Required]

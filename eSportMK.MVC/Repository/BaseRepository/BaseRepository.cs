@@ -1,13 +1,12 @@
-﻿using eSportMK.Repository.ResponseObject;
-using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using System.Threading.Tasks;
+using eSportMK.MVC.Response;
+using Microsoft.EntityFrameworkCore;
 
-namespace eSportMK.Repository.BaseRepository
+namespace eSportMK.MVC.Repository.BaseRepository
 {
     public class BaseRepository<TContext> : IRepository where TContext : DbContext
     {
@@ -69,7 +68,7 @@ namespace eSportMK.Repository.BaseRepository
             try
             {
                 var entities = GetQueryable<TEntity>(null, orderBy, includeProperties, skip, take).ToList();
-                if (entities == null)
+                if (!entities.Any())
                 {
                     response.ErrorMessage = String.Format("No entries of type {0} found", typeof(TEntity).Name);
                     response.Success = false;
@@ -128,7 +127,7 @@ namespace eSportMK.Repository.BaseRepository
             try
             {
                 var entities = GetQueryable<TEntity>(null, orderBy, includeProperties, skip, take).ToList();
-                if (entities == null)
+                if (!entities.Any())
                 {
                     response.ErrorMessage = String.Format("No entries of type {0} found", typeof(TEntity).Name);
                     response.Success = false;

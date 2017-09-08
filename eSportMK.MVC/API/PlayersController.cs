@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using eSportMK.MVC.Models;
-using eSportMK.Repository.BaseRepository;
 using eSportMK.MVC.DTOs.Player;
 using eSportMK.MVC.DTOs.Team;
+using eSportMK.MVC.Repository.BaseRepository;
 
 namespace eSportMK.MVC.API
 {
@@ -41,7 +41,7 @@ namespace eSportMK.MVC.API
             {
                 return NotFound();
             }
-            return Ok( response.Data.Select(x => new PlayerDto { FirstName = x.FirstName, Country = x.Country.Name, LastName = x.LastName, Nickname = x.Nickname, Team = x.Team.Name }).ToList());
+            return Ok(response.Data.Select(x => new PlayerDto {Id = x.Id, FirstName = x.FirstName, Country = x.Country.Name, LastName = x.LastName, Nickname = x.Nickname, Team = x.Team.Name, Game = x.Game.Name }).ToList());
         }
 
         // GET: api/Players/5
@@ -53,80 +53,120 @@ namespace eSportMK.MVC.API
                 return BadRequest(ModelState);
             }
 
-            var getPlayer = await _repo.GetFirstAsync<Player>(x => x.Id.Equals(id), null, String.Join(",", new object[] { nameof(Player.Country), nameof(Player.Game), nameof(Player.Team) }));
-
-            if (!getPlayer.Success)
+            try
             {
-                return NotFound();
+                var getPlayer = await _repo.GetFirstAsync<Player>(x => x.Id.Equals(id), null,
+                    String.Join(",", new object[] {nameof(Player.Country), nameof(Player.Game), nameof(Player.Team)}));
+
+                if (!getPlayer.Success)
+                {
+                    return NotFound();
+                }
+                var player = getPlayer.Data;
+
+                var playerDto = new PlayerDto
+                {
+                    Id = player.Id,
+                    FirstName = player.FirstName,
+                    LastName = player.LastName,
+                    Nickname = player.Nickname,
+                    Country = player.Country.Name,
+                    DateOfBirth = player.DateOfBirth,
+                    Team = player.Team.Name,
+                    Game = player.Game.Name
+                };
+
+                return Ok(playerDto);
             }
-            var player = getPlayer.Data;
-
-            var playerDto = new PlayerDto
+            catch (Exception e)
             {
-                FirstName = player.FirstName,
-                LastName = player.LastName,
-                Nickname = player.Nickname,
-                Country = player.Country.Name,
-                DateOfBirth = player.DateOfBirth,
-                Team = player.Team.Name,
-                Game = player.Game.Name
-            };
-
-            return Ok(playerDto);
+                return BadRequest(e.Message);
+            }
         }
 
-        //// PUT: api/Players/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutPlayer([FromRoute] string id, [FromBody] Player player)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // PUT: api/Players/5
+        [HttpPost("update/{id}")]
+        public IActionResult PutPlayer([FromRoute] string id, [FromBody] PlayerDetailsDto playerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    if (id != player.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+            if (id != playerDto.Id)
+            {
+                return BadRequest();
+            }
 
-        //    _context.Entry(player).State = EntityState.Modified;
+            try
+            {
+                var getPlayer = _repo.GetFirst<Player>(x => x.Id.Equals(id), null,
+                    String.Join(",",
+                        new object[]
+                        {
+                            nameof(Player.Game), nameof(Player.Country), nameof(Player.Team), nameof(Player.Statistics)
+                        }));
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!PlayerExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+                if (!getPlayer.Success)
+                {
+                    return NotFound();
+                }
 
-        //    return NoContent();
-        //}
+                var player = getPlayer.Data;
 
-        //// POST: api/Players
-        //[HttpPost]
-        //public async Task<IActionResult> PostPlayer([FromBody] Player player)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+                player.FirstName = playerDto.FirstName ?? player.FirstName;
+                player.LastName = playerDto.LastName ?? player.LastName;
+                player.Nickname = playerDto.Nickname ?? player.Nickname;
+                player.TeamId = playerDto.TeamId ?? player.TeamId;
 
-        //    _context.Players.Add(player);
-        //    await _context.SaveChangesAsync();
+                var update = _repo.Update<Player>(player);
+                return Ok(update.Data);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PlayerExists(id))
+                {
+                    return NotFound();
+                }
+                return BadRequest();
+            }
+        }
 
-        //    return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
-        //}
+       // POST: api/Players
+       //[HttpPost("create")]
+       // public IActionResult PostPlayer([FromBody] PlayerDetailsDto playerDto)
+       // {
+       //     if (!ModelState.IsValid)
+       //     {
+       //         return BadRequest(ModelState);
+       //     }
+
+       //     try
+       //     {
+       //         var player = new Player
+       //         {
+       //             Id = Guid.NewGuid().ToString(),
+       //             FirstName = playerDto.FirstName,
+       //             LastName = playerDto.LastName,
+       //             Nickname = playerDto.Nickname,
+       //             DateOfBirth = playerDto.DateOfBirth,
+       //             CountryId = playerDto.CountryId,
+       //             GameId = playerDto.GameId,
+       //             TeamId = playerDto.TeamId
+       //         };
+
+       //         var create = _repo.Create<Player>(player);
+       //         return Ok(create.Success);
+       //     }
+       //     catch (Exception e)
+       //     {
+       //         Console.WriteLine(e);
+       //         throw;
+       //     }
+       // }
 
         // DELETE: api/Players/5
-        [HttpDelete("{id}")]
+        [HttpPost("delete/{id}")]
         public async Task<IActionResult> DeletePlayer([FromRoute] string id)
         {
             if (!ModelState.IsValid)
@@ -154,9 +194,9 @@ namespace eSportMK.MVC.API
             }
         }
 
-        //private bool PlayerExists(string id)
-        //{
-        //    return _context.Players.Any(e => e.Id == id);
-        //}
+        private bool PlayerExists(string id)
+        {
+            return _repo.GetExists<Player>(e => e.Id == id).Data;
+        }
     }
 }

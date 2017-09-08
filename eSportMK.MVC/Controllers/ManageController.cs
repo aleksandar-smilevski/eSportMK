@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using eSportMK.MVC.Models;
-using eSportMK.MVC.Models.ManageViewModels;
 using eSportMK.MVC.Services;
+using eSportMK.MVC.ViewModels.ManageViewModels;
 
 namespace eSportMK.MVC.Controllers
 {

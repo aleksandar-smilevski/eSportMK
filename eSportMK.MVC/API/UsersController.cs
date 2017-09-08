@@ -4,15 +4,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using eSportMK.MVC.Models;
 using eSportMK.Dto;
-using eSportMK.Repository.BaseRepository;
 using eSportMK.MVC.DTOs.Team;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Identity;
 using System;
+using eSportMK.MVC.Repository.BaseRepository;
 
 namespace eSportMK.MVC.API
 {
+    [Produces("application/x-www-form-urlencoded")]
     [Route("api/users")]
     public class UsersController : Controller
     {
@@ -42,14 +42,14 @@ namespace eSportMK.MVC.API
             {
                 return BadRequest(ModelState);
             }
-            var applicationUser = await _userManager.FindByIdAsync(id);
-            var users = await _userManager.GetUsersInRoleAsync("Admin");
+            var getApplicationUser = await _repo.GetFirstAsync<ApplicationUser>(x => x.Id.Equals(id), null, nameof(ApplicationUser.Roles));
 
-            if (applicationUser == null)
+            if (!getApplicationUser.Success)
             {
                 return NotFound();
             }
 
+            var applicationUser = getApplicationUser.Data;
             var allRoles = _roleManager.Roles.ToList();
 
             var roles = applicationUser.Roles.Join(allRoles, ur => ur.RoleId, r => r.Id, (userRoles, role) => new string(role.Name.ToCharArray()));
@@ -123,14 +123,11 @@ namespace eSportMK.MVC.API
                 }
 
                 var add = await _userManager.AddToRoleAsync(user, role.Name);
-                if (add.Succeeded)
-                    return Ok(true);
-
-                return Ok(false);
+                return Ok(add.Succeeded);
             }
             catch(Exception e)
             {
-                return BadRequest();
+                return BadRequest(e.Message);
             }
         }
 

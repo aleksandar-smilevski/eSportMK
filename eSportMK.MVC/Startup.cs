@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using eSportMK.Repository.BaseRepository;
 using eSportMK.MVC.Services;
 using eSportMK.MVC.Database;
 using eSportMK.MVC.Models;
@@ -14,6 +13,8 @@ using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Rewrite.Internal;
 using Microsoft.AspNetCore.Identity;
 using System;
+using System.Threading.Tasks;
+using eSportMK.MVC.Repository.BaseRepository;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace eSportMK.MVC
@@ -92,7 +93,8 @@ namespace eSportMK.MVC
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, ApplicationDbContext context)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, 
+            ILoggerFactory loggerFactory, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -136,7 +138,8 @@ namespace eSportMK.MVC
                         defaults: new { controller = "Home", action = "Index" });
             });
 
-            DbInitializer.InitializeAsync(context);
+            context.Database.Migrate();
+            DbInitializer.InitializeAsync(context, userManager, roleManager);
         }
     }
 }

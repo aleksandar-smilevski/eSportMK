@@ -9,9 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using eSportMK.MVC.Models.AccountViewModels;
 using eSportMK.MVC.Services;
 using eSportMK.MVC.Models;
+using eSportMK.MVC.ViewModels.AccountViewModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace eSportMK.MVC.Controllers
@@ -70,11 +70,11 @@ namespace eSportMK.MVC.Controllers
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
                 if (result.Succeeded)
                 {
                     _logger.LogInformation(1, "User logged in.");
-                    var user = _userManager.Users.Where(x => x.Email == model.Email).FirstOrDefault();
                     var userRoles = await _userManager.GetRolesAsync(user);
 
                     await _signInManager.SignInAsync(user, model.RememberMe);

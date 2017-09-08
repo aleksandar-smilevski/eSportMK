@@ -14,9 +14,13 @@
 
   <ItemGroup>
     <Compile Remove="Migrations\**" />
+    <Compile Remove="wwwroot\adminapp\controllers\**" />
     <Content Remove="Migrations\**" />
+    <Content Remove="wwwroot\adminapp\controllers\**" />
     <EmbeddedResource Remove="Migrations\**" />
+    <EmbeddedResource Remove="wwwroot\adminapp\controllers\**" />
     <None Remove="Migrations\**" />
+    <None Remove="wwwroot\adminapp\controllers\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +31,6 @@
 
   <ItemGroup>
     <Content Include="wwwroot\adminapp\app.js" />
-    <Content Include="wwwroot\adminapp\controllers\users.controllers.js" />
     <Content Include="wwwroot\adminapp\users\users.controllers.js" />
     <Content Include="wwwroot\adminapp\users\users.routes.js" />
     <Content Include="wwwroot\adminapp\views\home.html" />
