@@ -13,7 +13,7 @@ using eSportMK.MVC.DTOs.Team;
 namespace eSportMK.MVC.API
 {
     [Produces("application/json")]
-    [Route("api/Players")]
+    [Route("api/players")]
     public class PlayersController : Controller
     {
         private readonly IRepository _repo;
@@ -24,6 +24,11 @@ namespace eSportMK.MVC.API
         }
 
         // GET: api/Players
+        /// <summary>
+        /// 1 - Dota2, 2 - CSGO, 3 - LOL, 4 - Overwatch
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <returns></returns>
         [HttpGet("{gameId:int}")]
         public async Task<IActionResult> GetPlayersAsync(int? gameId)
         {
@@ -36,27 +41,39 @@ namespace eSportMK.MVC.API
             {
                 return NotFound();
             }
-            return Ok( response.Data.Select(x => new PlayerDto { FirstName = x.FirstName, Country = x.Country.Name, LastName = x.LastName, Nickname = x.Nickname, Team = new TeamDto { Name = x.Team.Name } }).ToList());
+            return Ok( response.Data.Select(x => new PlayerDto { FirstName = x.FirstName, Country = x.Country.Name, LastName = x.LastName, Nickname = x.Nickname, Team = x.Team.Name }).ToList());
         }
 
-        //// GET: api/Players/5
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetPlayer([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // GET: api/Players/5
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPlayer([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    var player = await _context.Players.SingleOrDefaultAsync(m => m.Id == id);
+            var getPlayer = await _repo.GetFirstAsync<Player>(x => x.Id.Equals(id), null, String.Join(",", new object[] { nameof(Player.Country), nameof(Player.Game), nameof(Player.Team) }));
 
-        //    if (player == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (!getPlayer.Success)
+            {
+                return NotFound();
+            }
+            var player = getPlayer.Data;
 
-        //    return Ok(player);
-        //}
+            var playerDto = new PlayerDto
+            {
+                FirstName = player.FirstName,
+                LastName = player.LastName,
+                Nickname = player.Nickname,
+                Country = player.Country.Name,
+                DateOfBirth = player.DateOfBirth,
+                Team = player.Team.Name,
+                Game = player.Game.Name
+            };
+
+            return Ok(playerDto);
+        }
 
         //// PUT: api/Players/5
         //[HttpPut("{id}")]
@@ -108,26 +125,34 @@ namespace eSportMK.MVC.API
         //    return CreatedAtAction("GetPlayer", new { id = player.Id }, player);
         //}
 
-        //// DELETE: api/Players/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeletePlayer([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // DELETE: api/Players/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePlayer([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    var player = await _context.Players.SingleOrDefaultAsync(m => m.Id == id);
-        //    if (player == null)
-        //    {
-        //        return NotFound();
-        //    }
+            try
+            {
+                var getPlayer = await _repo.GetFirstAsync<Player>(x => x.Id.Equals(id), null, String.Join(",", new object[] { nameof(Player.Country), nameof(Player.Game), nameof(Player.Team) }));
+                if (!getPlayer.Success)
+                {
+                    return NotFound();
+                }
 
-        //    _context.Players.Remove(player);
-        //    await _context.SaveChangesAsync();
+                var delete = _repo.Delete<Player>(id);
+                if(delete.Success)
+                    return Ok(true);
 
-        //    return Ok(player);
-        //}
+                return Ok(false);
+            }
+            catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         //private bool PlayerExists(string id)
         //{

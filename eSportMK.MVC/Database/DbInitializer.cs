@@ -1,4 +1,5 @@
 ﻿using eSportMK.MVC.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -7,20 +8,20 @@ namespace eSportMK.MVC.Database
 {
     public static class DbInitializer
     {
-        public static void Initialize(ApplicationDbContext context)
+
+        public static void InitializeAsync(ApplicationDbContext context)
         {
             try
             {
-                context.Database.EnsureCreated();
+                //context.Database.EnsureCreated();
 
                 if (!context.Roles.Any())
                 {
                     var roles = new IdentityRole[]
                     {
-                    new IdentityRole("Admin"),
-                    new IdentityRole("User")
+                        new IdentityRole("Admin"),
+                        new IdentityRole("User")
                     };
-
                     context.Roles.AddRange(roles);
                     context.SaveChanges();
                 }
@@ -318,7 +319,7 @@ namespace eSportMK.MVC.Database
                     context.SaveChanges();
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }

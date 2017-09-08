@@ -12,6 +12,9 @@ using eSportMK.MVC.Models;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.AspNetCore.Rewrite.Internal;
+using Microsoft.AspNetCore.Identity;
+using System;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace eSportMK.MVC
 {
@@ -47,6 +50,26 @@ namespace eSportMK.MVC
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+            // Configure Identity
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Password settings
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = false;
+
+                // Cookie settings
+                options.Cookies.ApplicationCookie.ExpireTimeSpan = TimeSpan.FromDays(150);
+                options.Cookies.ApplicationCookie.LoginPath = "/Account/LogIn";
+                options.Cookies.ApplicationCookie.LogoutPath = "/Account/LogOut";
+
+                // User settings
+                options.User.RequireUniqueEmail = true;
+            });
+
+
             services.Configure<RazorViewEngineOptions>(options =>
             {
                 options.AreaViewLocationFormats.Clear();
@@ -56,6 +79,11 @@ namespace eSportMK.MVC
             });
 
             services.AddMvc();
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
 
             // Add application services.
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -84,13 +112,13 @@ namespace eSportMK.MVC
 
             app.UseIdentity();
 
-            //app.UseRewriter(new RewriteOptions()
-            //{
-            //    Rules =
-            //    {
-            //        new RewriteRule("Home/Index", "/", true)
-            //    }
-            //});
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
             // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
@@ -98,9 +126,17 @@ namespace eSportMK.MVC
             {
                 routes.MapRoute("areaRoute", "{area:exists}/{controller=Admin}/{action=Index}/{id?}");
                 routes.MapRoute("default", "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute(
+                        name: "spa-fallback-admin",
+                        template: "admin/{*url}",
+                        defaults: new { area = "Admin",controller = "Admin", action = "Index" });
+                routes.MapRoute(
+                        name: "spa-fallback",
+                        template: "{*url}",
+                        defaults: new { controller = "Home", action = "Index" });
             });
 
-            DbInitializer.Initialize(context);
+            DbInitializer.InitializeAsync(context);
         }
     }
 }

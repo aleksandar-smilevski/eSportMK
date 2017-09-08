@@ -12,6 +12,8 @@ namespace eSportMK.MVC.DTOs.Player
         public string LastName { get; set; }
         public string Nickname { get; set; }
         public string Country { get; set; }
-        public TeamDto Team { get; set; }
+        public string Game { get; set; }
+        public string Team { get; set; }
+        public DateTime DateOfBirth { get; set; }
     }
 }

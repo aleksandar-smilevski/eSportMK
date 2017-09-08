@@ -13,7 +13,7 @@ using eSportMK.MVC.Models;
 namespace eSportMK.MVC
 {
     [Produces("application/json")]
-    [Route("api/Games")]
+    [Route("api/games")]
     public class GamesController : Controller
     {
         private readonly IRepository _repo;
@@ -101,7 +101,7 @@ namespace eSportMK.MVC
         }
 
         // POST: api/Games
-        [HttpPost]
+        [HttpPost("create")]
         public  IActionResult PostGame([FromBody] CreateGameDto gameDto)
         {
             if (!ModelState.IsValid)
@@ -123,7 +123,7 @@ namespace eSportMK.MVC
         }
 
         // DELETE: api/Games/5
-        [HttpDelete("{id}")]
+        [HttpPost("delete/{id}")]
         public async Task<IActionResult> DeleteGame([FromRoute] int id)
         {
             if (!ModelState.IsValid)

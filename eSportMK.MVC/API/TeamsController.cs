@@ -114,17 +114,15 @@ namespace eSportMK.MVC.API
                 return BadRequest(ModelState);
             }
 
-            //MAPPING NOT DONE
             //var team = new Team
             //{
             //    Name = teamDto.Name,
-            //    Country = new Country { Name = teamDto.Country.Name, },
-            //    Game = new Game { Name = teamDto.Game.Name, Id = teamDto.Game.Id}
+            //    C = teamDto.Country.Id
+            //    Game = new Game { Name = teamDto.Game.Name, Id = teamDto.Game.Id }
             //};
 
             //_context.Teams.Add(team);
             //await _context.SaveChangesAsync();
-
             return Ok();
         }
 

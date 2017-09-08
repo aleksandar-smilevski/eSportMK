@@ -19,7 +19,6 @@ namespace eSportMK.MVC.Models
         public DbSet<Result> Results { get; set; }
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamTournament> TeamTournaments { get; set; }
-        public DbSet<ApplicationUser> ApplicationUser { get; set; }
         public DbSet<Country> Countries { get; set; }
     }
 }

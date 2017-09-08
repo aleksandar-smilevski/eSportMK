@@ -8,36 +8,14 @@ using eSportMK.MVC.Models;
 namespace eSportMK.MVC.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170907212022_add match model")]
+    partial class addmatchmodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("eSportMK.MVC.Models.ApplicationRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasName("RoleNameIndex");
-
-                    b.ToTable("AspNetRoles");
-                });
 
             modelBuilder.Entity("eSportMK.MVC.Models.ApplicationUser", b =>
                 {
@@ -143,16 +121,12 @@ namespace eSportMK.MVC.Migrations
 
             modelBuilder.Entity("eSportMK.MVC.Models.Match", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
                     b.Property<DateTime>("Date");
 
                     b.Property<int>("GameId");
-
-                    b.Property<int>("MatchType");
-
-                    b.Property<int>("ResultId");
 
                     b.Property<string>("Team1Id");
 
@@ -163,9 +137,6 @@ namespace eSportMK.MVC.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GameId");
-
-                    b.HasIndex("ResultId")
-                        .IsUnique();
 
                     b.HasIndex("Team1Id");
 
@@ -225,8 +196,10 @@ namespace eSportMK.MVC.Migrations
 
             modelBuilder.Entity("eSportMK.MVC.Models.Result", b =>
                 {
-                    b.Property<int>("MatchId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<string>("MatchId");
 
                     b.Property<int>("ScoreTeam1");
 
@@ -234,7 +207,10 @@ namespace eSportMK.MVC.Migrations
 
                     b.Property<string>("TeamId");
 
-                    b.HasKey("MatchId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("MatchId")
+                        .IsUnique();
 
                     b.HasIndex("TeamId");
 
@@ -307,6 +283,29 @@ namespace eSportMK.MVC.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("Tournaments");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasName("RoleNameIndex");
+
+                    b.ToTable("AspNetRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
@@ -400,11 +399,6 @@ namespace eSportMK.MVC.Migrations
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("eSportMK.MVC.Models.Result", "Result")
-                        .WithOne("Match")
-                        .HasForeignKey("eSportMK.MVC.Models.Match", "ResultId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("eSportMK.MVC.Models.Team", "Team1")
                         .WithMany()
                         .HasForeignKey("Team1Id");
@@ -445,6 +439,10 @@ namespace eSportMK.MVC.Migrations
 
             modelBuilder.Entity("eSportMK.MVC.Models.Result", b =>
                 {
+                    b.HasOne("eSportMK.MVC.Models.Match", "Match")
+                        .WithOne("Result")
+                        .HasForeignKey("eSportMK.MVC.Models.Result", "MatchId");
+
                     b.HasOne("eSportMK.MVC.Models.Team")
                         .WithMany("Results")
                         .HasForeignKey("TeamId");
@@ -487,7 +485,7 @@ namespace eSportMK.MVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("eSportMK.MVC.Models.ApplicationRole")
+                    b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole")
                         .WithMany("Claims")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -511,7 +509,7 @@ namespace eSportMK.MVC.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("eSportMK.MVC.Models.ApplicationRole")
+                    b.HasOne("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRole")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
