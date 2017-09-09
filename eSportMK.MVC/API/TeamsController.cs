@@ -32,14 +32,27 @@ namespace eSportMK.MVC.API
             {
                 return BadRequest();
             }
-            var response = await _repo.GetAsync<Team>(x => x.GameId.Equals(gameId), null, String.Join(",", new object[] { nameof(Team.Game), nameof(Team.Players), nameof(Team.Country) }) );
+            var response = await _repo.GetAsync<Team>(x => x.GameId.Equals(gameId), null, String.Join(",", new object[] { /*nameof(Team.Game),*/ nameof(Team.Players), nameof(Team.Country) }) );
             if (!response.Success)
             {
                 return NotFound();
             }
 
             var teams = response.Data;
-            return Ok(teams.Select(x => new TeamDto() { Id = x.Id, Name = x.Name, Country = new CountryDto() {Id = x.CountryId, Name = x.Country.Name}, Game = new GameDto(){Id = x.GameId, Name = x.Name }}).ToList());
+            var list = new List<TeamDto>();
+            foreach (var team in teams)
+            {
+                var dto = new TeamDto()
+                {
+                    Id = team.Id,
+                    Name = team.Name,
+                    Country = _repo.GetFirst<Country>(x => x.Id.Equals(team.CountryId)).Data.Name,
+                    Game = _repo.GetFirst<Game>(x => x.Id.Equals(team.GameId)).Data.Name,
+                    Players = _repo.Get<Player>(x => x.TeamId == team.Id).Data.Select(x => x.Nickname).ToList()
+                };
+                list.Add(dto);
+            }
+            return Ok(list);
         }
 
         // GET: api/Teams/5
@@ -51,19 +64,20 @@ namespace eSportMK.MVC.API
                 return BadRequest(ModelState);
             }
 
-            var team = await _repo.GetOneAsync<Team>(x => x.Id.Equals(id), String.Join(",", new object[] { nameof(Team.Game), nameof(Team.Country), nameof(Team.Players) }));
-            var players = await _repo.GetAsync<Player>(x => x.TeamId.Equals(id));
-            if (!team.Success)
+            var getTeam = await _repo.GetOneAsync<Team>(x => x.Id.Equals(id), String.Join(",", new object[] { nameof(Team.Game), nameof(Team.Country), nameof(Team.Players) }));
+            if (!getTeam.Success)
             {
                 return NotFound();
             }
 
+            var team = getTeam.Data;
             var teamDto = new TeamDto
             {
-                Name = team.Data.Name,
-                Game = new GameDto { Name = team.Data.Game.Name, Id = team.Data.Game.Id },
-                Country = new CountryDto { Name = team.Data.Country.Name },
-                Players = players.Data.Any() ? players.Data.Select(x => new PlayerDto() { Nickname = x.Nickname }).ToList(): new List<PlayerDto>()
+                Id = team.Id,
+                Name = team.Name,
+                Country = _repo.GetFirst<Country>(x => x.Id.Equals(team.CountryId)).Data.Name,
+                Game = _repo.GetFirst<Game>(x => x.Id.Equals(team.GameId)).Data.Name,
+                Players = _repo.Get<Player>(x => x.TeamId.Equals(team.Id)).Data.Select(x => x.Nickname).ToList()
             };
 
             return Ok(teamDto);
@@ -105,46 +119,60 @@ namespace eSportMK.MVC.API
         //}
 
         // POST: api/Teams
-        [HttpPost]
-        public IActionResult PostTeam([FromBody] TeamDto teamDto)
+        [HttpPost("create")]
+        public IActionResult PostTeam([FromBody] TeamPostDto teamDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            //var team = new Team
-            //{
-            //    Name = teamDto.Name,
-            //    C = teamDto.Country.Id
-            //    Game = new Game { Name = teamDto.Game.Name, Id = teamDto.Game.Id }
-            //};
+            try
+            {
+                var team = new Team()
+                {
+                    Name = teamDto.Name,
+                    GameId = teamDto.GameId,
+                    CountryId = teamDto.CountryId
+                };
 
-            //_context.Teams.Add(team);
-            //await _context.SaveChangesAsync();
-            return Ok();
+                var create = _repo.Create<Team>(team);
+                if (!create.Success) return Ok(false);
+                return Ok(true);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
         }
 
-        //// DELETE: api/Teams/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteTeam([FromRoute] string id)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // DELETE: api/Teams/5
+        [HttpPost("delete/{id}")]
+        public async Task<IActionResult> DeleteTeam([FromRoute] string id)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            try
+            {
 
-        //    var team = await _context.Teams.SingleOrDefaultAsync(m => m.Id == id);
-        //    if (team == null)
-        //    {
-        //        return NotFound();
-        //    }
+                var team = await _repo.GetFirstAsync<Team>(x => x.Id.Equals(id));
+                if (!team.Success)
+                {
+                    return NotFound();
+                }
 
-        //    _context.Teams.Remove(team);
-        //    await _context.SaveChangesAsync();
+                var delete = _repo.Delete<Team>(id);
+                if (delete.Success) return Ok(true);
 
-        //    return Ok(team);
-        //}
+                return Ok(false);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
         //private bool TeamExists(string id)
         //{

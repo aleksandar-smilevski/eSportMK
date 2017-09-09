@@ -132,38 +132,38 @@ namespace eSportMK.MVC.API
             }
         }
 
-       // POST: api/Players
-       //[HttpPost("create")]
-       // public IActionResult PostPlayer([FromBody] PlayerDetailsDto playerDto)
-       // {
-       //     if (!ModelState.IsValid)
-       //     {
-       //         return BadRequest(ModelState);
-       //     }
+        // POST: api/Players
+        [HttpPost("create")]
+        public IActionResult PostPlayer([FromBody] PlayerDetailsDto playerDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-       //     try
-       //     {
-       //         var player = new Player
-       //         {
-       //             Id = Guid.NewGuid().ToString(),
-       //             FirstName = playerDto.FirstName,
-       //             LastName = playerDto.LastName,
-       //             Nickname = playerDto.Nickname,
-       //             DateOfBirth = playerDto.DateOfBirth,
-       //             CountryId = playerDto.CountryId,
-       //             GameId = playerDto.GameId,
-       //             TeamId = playerDto.TeamId
-       //         };
+            try
+            {
+                var player = new Player
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FirstName = playerDto.FirstName,
+                    LastName = playerDto.LastName,
+                    Nickname = playerDto.Nickname,
+                    DateOfBirth = playerDto.DateOfBirth,
+                    CountryId = playerDto.CountryId,
+                    GameId = playerDto.GameId,
+                    TeamId = playerDto.TeamId
+                };
 
-       //         var create = _repo.Create<Player>(player);
-       //         return Ok(create.Success);
-       //     }
-       //     catch (Exception e)
-       //     {
-       //         Console.WriteLine(e);
-       //         throw;
-       //     }
-       // }
+                var create = _repo.Create<Player>(player);
+                return Ok(create.Success);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
 
         // DELETE: api/Players/5
         [HttpPost("delete/{id}")]

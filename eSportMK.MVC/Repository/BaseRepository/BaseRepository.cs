@@ -10,11 +10,11 @@ namespace eSportMK.MVC.Repository.BaseRepository
 {
     public class BaseRepository<TContext> : IRepository where TContext : DbContext
     {
-        protected readonly TContext context;
+        protected readonly TContext Context;
 
         public BaseRepository(TContext context)
         {
-            this.context = context;
+            Context = context;
         }
 
         protected virtual IQueryable<TEntity> GetQueryable<TEntity>(
@@ -26,7 +26,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             where TEntity : class
         {
             includeProperties = includeProperties ?? string.Empty;
-            IQueryable<TEntity> query = context.Set<TEntity>();
+            IQueryable<TEntity> query = Context.Set<TEntity>();
 
             if (filter != null)
             {
@@ -126,7 +126,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<IEnumerable<TEntity>> { Data = new List<TEntity>() };
             try
             {
-                var entities = GetQueryable<TEntity>(null, orderBy, includeProperties, skip, take).ToList();
+                var entities = GetQueryable<TEntity>(filter, orderBy, includeProperties, skip, take).ToList();
                 if (!entities.Any())
                 {
                     response.ErrorMessage = String.Format("No entries of type {0} found", typeof(TEntity).Name);
@@ -156,7 +156,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<IEnumerable<TEntity>> { Data = new List<TEntity>() };
             try
             {
-                var entities = await GetQueryable<TEntity>(null, orderBy, includeProperties, skip, take).ToListAsync();
+                var entities = await GetQueryable<TEntity>(filter, orderBy, includeProperties, skip, take).ToListAsync();
                 if (entities == null)
                 {
                     response.ErrorMessage = String.Format("No entries of type {0} found", typeof(TEntity).Name);
@@ -183,7 +183,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<TEntity> { Data = null };
             try
             {
-                var entity = GetQueryable<TEntity>(filter, null, includeProperties, null, null).SingleOrDefault();
+                var entity = GetQueryable<TEntity>(filter, null, includeProperties).SingleOrDefault();
                 if (entity == null)
                 {
                     response.ErrorMessage = String.Format("No such entry of type {0} found", typeof(TEntity).Name);
@@ -210,7 +210,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<TEntity> { Data = null };
             try
             {
-                var entity = await GetQueryable<TEntity>(filter, null, includeProperties, null, null).SingleOrDefaultAsync();
+                var entity = await GetQueryable<TEntity>(filter, null, includeProperties).SingleOrDefaultAsync();
                 if (entity == null)
                 {
                     response.ErrorMessage = String.Format("No such entry of type {0} found", typeof(TEntity).Name);
@@ -238,7 +238,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<TEntity> { Data = null };
             try
             {
-                var entity = GetQueryable<TEntity>(filter, null, includeProperties, null, null).SingleOrDefault();
+                var entity = GetQueryable<TEntity>(filter, orderBy, includeProperties).SingleOrDefault();
                 if (entity == null)
                 {
                     response.ErrorMessage = String.Format("No such entry of type {0} found", typeof(TEntity).Name);
@@ -291,7 +291,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<TEntity> { Data = null };
             try
             {
-                var entity = context.Set<TEntity>().Find(id);
+                var entity = Context.Set<TEntity>().Find(id);
                 if (entity == null)
                 {
                     response.ErrorMessage = String.Format("No such entry of type {0} found. Key used {1}", typeof(TEntity).Name, id);
@@ -316,7 +316,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<TEntity> { Data = null };
             try
             {
-                var entity = await context.Set<TEntity>().FindAsync(id);
+                var entity = await Context.Set<TEntity>().FindAsync(id);
                 if (entity == null)
                 {
                     response.ErrorMessage = String.Format("No such entry of type {0} found. Key used {1}", typeof(TEntity).Name, id);
@@ -391,7 +391,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<bool> { Data = false };
             try
             {
-                context.Set<TEntity>().Add(entity);
+                Context.Set<TEntity>().Add(entity);
                 response.Success = true;
                 response.Data = true;
                 Save();
@@ -412,8 +412,8 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<bool> { Data = false };
             try
             {
-                context.Set<TEntity>().Attach(entity);
-                context.Entry(entity).State = EntityState.Modified;
+                Context.Set<TEntity>().Attach(entity);
+                Context.Entry(entity).State = EntityState.Modified;
                 Save();
                 response.Success = true;
                 response.Data = true;
@@ -433,7 +433,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<bool> { Data = false };
             try
             {
-                var entity = context.Set<TEntity>().Find(id);
+                var entity = Context.Set<TEntity>().Find(id);
                 if(entity == null)
                 {
                     response.Success = false;
@@ -467,8 +467,8 @@ namespace eSportMK.MVC.Repository.BaseRepository
             var response = new Response<bool> { Data = false };
             try
             {
-                var dbSet = context.Set<TEntity>();
-                if (context.Entry(entity).State == EntityState.Detached)
+                var dbSet = Context.Set<TEntity>();
+                if (Context.Entry(entity).State == EntityState.Detached)
                 {
                     dbSet.Attach(entity);
                 }
@@ -490,7 +490,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
         {
             try
             {
-                context.SaveChanges();
+                Context.SaveChanges();
             }
             catch (Exception e)
             {
@@ -502,7 +502,7 @@ namespace eSportMK.MVC.Repository.BaseRepository
         {
             try
             {
-                return context.SaveChangesAsync();
+                return Context.SaveChangesAsync();
             }
             catch (Exception e)
             {
