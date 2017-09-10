@@ -26,6 +26,12 @@
   <ItemGroup>
     <Compile Include="Migrations\20170908071345_init.cs" />
     <Compile Include="Migrations\20170908071345_init.Designer.cs" />
+    <Compile Include="Migrations\20170909144127_tourneyLocation.cs" />
+    <Compile Include="Migrations\20170909144127_tourneyLocation.Designer.cs" />
+    <Compile Include="Migrations\20170909151608_changedGame.cs" />
+    <Compile Include="Migrations\20170909151608_changedGame.Designer.cs" />
+    <Compile Include="Migrations\20170909161751_test.cs" />
+    <Compile Include="Migrations\20170909161751_test.Designer.cs" />
     <Compile Include="Migrations\ApplicationDbContextModelSnapshot.cs" />
   </ItemGroup>
 

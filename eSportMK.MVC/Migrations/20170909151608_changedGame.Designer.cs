@@ -1,17 +1,18 @@
 ﻿using System;
+using eSportMK.MVC.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using eSportMK.MVC.Database;
 using eSportMK.MVC.Models;
 
 namespace eSportMK.MVC.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170909151608_changedGame")]
+    partial class changedGame
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")
@@ -271,7 +272,7 @@ namespace eSportMK.MVC.Migrations
 
                     b.Property<int>("GameId");
 
-                    b.Property<int?>("LocationId");
+                    b.Property<int>("LocationId");
 
                     b.Property<string>("Name");
 
@@ -486,8 +487,9 @@ namespace eSportMK.MVC.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("eSportMK.MVC.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId");
+                        .WithMany("Tournaments")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>

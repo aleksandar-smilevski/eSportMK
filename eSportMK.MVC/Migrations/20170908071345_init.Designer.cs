@@ -1,4 +1,5 @@
 ﻿using System;
+using eSportMK.MVC.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;

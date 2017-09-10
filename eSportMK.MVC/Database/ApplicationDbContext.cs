@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using eSportMK.MVC.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using eSportMK.MVC.Models;
 
-namespace eSportMK.MVC.Models
+namespace eSportMK.MVC.Database
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
@@ -20,5 +20,10 @@ namespace eSportMK.MVC.Models
         public DbSet<Team> Teams { get; set; }
         public DbSet<TeamTournament> TeamTournaments { get; set; }
         public DbSet<Country> Countries { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+        }
     }
 }

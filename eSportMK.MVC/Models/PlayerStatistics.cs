@@ -5,7 +5,7 @@ namespace eSportMK.MVC.Models
     public class PlayerStatistics
     {
         [Key]
-        public string PlayerId { get; set; }
+        public int PlayerId { get; set; }
         public float Kills { get; set; }
         public float Deaths { get; set; }
         public int MatchesPlayed { get; set; }

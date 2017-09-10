@@ -9,6 +9,7 @@ using eSportMK.MVC.DTOs.Country;
 using eSportMK.MVC.DTOs;
 using eSportMK.MVC.DTOs.Player;
 using eSportMK.MVC.Repository.BaseRepository;
+using Microsoft.EntityFrameworkCore;
 
 namespace eSportMK.MVC.API
 {
@@ -23,9 +24,8 @@ namespace eSportMK.MVC.API
             _repo = repo;
         }
 
-        // ???
         // GET: api/Teams
-        [HttpGet("{gameId:int}")]
+        [HttpGet("all/{gameId:int}")]
         public async Task<IActionResult> GetTeamsAsync(int? gameId)
         {
             if (gameId == null)
@@ -83,40 +83,50 @@ namespace eSportMK.MVC.API
             return Ok(teamDto);
         }
 
-        //// PUT: api/Teams/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutTeam([FromRoute] string id, [FromBody] Team team)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
+        // PUT: api/Teams/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutTeam([FromRoute] string id, [FromBody] TeamPostDto teamDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
-        //    if (id != team.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+            if (id != teamDto.Id)
+            {
+                return BadRequest();
+            }
 
-        //    _context.Entry(team).State = EntityState.Modified;
+            try
+            {
+                var getTeam = await _repo.GetFirstAsync<Team>(x => x.Id == id);
+                if (!getTeam.Success)
+                {
+                    return NotFound();
+                }
 
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!TeamExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+                var team = getTeam.Data;
 
-        //    return NoContent();
-        //}
+                team.Name = teamDto.Name ?? team.Name;
+                team.GameId = teamDto.GameId;
+                team.CountryId = teamDto.CountryId;
+
+                var update = _repo.Update<Team>(team);
+                if (update.Success) return Ok(true);
+                return Ok(false);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TeamExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return BadRequest();
+                }
+            }
+        }
 
         // POST: api/Teams
         [HttpPost("create")]
@@ -174,9 +184,9 @@ namespace eSportMK.MVC.API
             }
         }
 
-        //private bool TeamExists(string id)
-        //{
-        //    return _context.Teams.Any(e => e.Id == id);
-        //}
+        private bool TeamExists(string id)
+        {
+            return _repo.GetExists<Player>(e => e.Id == id).Data;
+        }
     }
 }

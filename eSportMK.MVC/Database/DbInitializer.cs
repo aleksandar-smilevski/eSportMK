@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -300,7 +301,7 @@ namespace eSportMK.MVC.Database
                 {
                     var teams = new[]
                     {
-                        new Team { Id = Guid.NewGuid().ToString(), Name = "SK Gaming", Country = context.Countries.FirstOrDefault(x => x.Name.Equals("Brazil")), Game = context.Games.FirstOrDefault(x => x.Name.Equals("CS:GO")) }
+                        new Team { Name = "SK Gaming", Country = context.Countries.FirstOrDefault(x => x.Name.Equals("Brazil")), Game = context.Games.FirstOrDefault(x => x.Name.Equals("CS:GO")) }
                     };
 
                     context.AddRange(teams);
@@ -320,6 +321,27 @@ namespace eSportMK.MVC.Database
                     context.AddRange(players);
                     context.SaveChanges();
                 }
+
+                //if (!context.Tournaments.Any())
+                //{
+                //    var tournaments = new List<Tournament>()
+                //    {
+                //        new Tournament()
+                //        {
+                //            Id = Guid.NewGuid().ToString(),
+                //            Name = "DreamHack Masters Malmö 2017",
+                //            Date = new DateTime(2017, 8, 30),
+                //            Description = "Major CS:GO tournamnet in Sweden",
+                //            PrizePool = new decimal(250000),
+                //            Type = TournamentType.Major,
+                //            GameId = context.Games.FirstOrDefault(x => x.Name == "CS:GO").Id,
+                //            LocationId = context.Locations.FirstOrDefault(x => x.City == "Malmö").Id
+                //        }
+                //    };
+
+                //    context.AddRange(tournaments);
+                //    context.SaveChanges();
+                //}
             }
             catch (Exception e)
             {

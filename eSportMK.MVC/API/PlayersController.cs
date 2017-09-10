@@ -23,20 +23,21 @@ namespace eSportMK.MVC.API
             _repo = repo;
         }
 
+
         // GET: api/Players
         /// <summary>
         /// 1 - Dota2, 2 - CSGO, 3 - LOL, 4 - Overwatch
         /// </summary>
         /// <param name="gameId"></param>
         /// <returns></returns>
-        [HttpGet("{gameId:int}")]
+        [HttpGet("all/{gameId:int}")]
         public async Task<IActionResult> GetPlayersAsync(int? gameId)
         {
             if (gameId == null)
             {
                 return BadRequest();
             }
-            var response = await _repo.GetAsync<Player>(x => x.Game.Id.Equals(gameId), null, String.Join(",", new object[] { nameof(Player.Game), nameof(Player.Country), nameof(Player.Team), nameof(Player.Statistics) }));
+            var response = await _repo.GetAsync<Player>(x => x.Game.Id.Equals(gameId), null, String.Join(",", new object[] { nameof(Player.Game), nameof(Player.Country), nameof(Player.Team)}));
             if (!response.Success)
             {
                 return NotFound();
@@ -104,7 +105,7 @@ namespace eSportMK.MVC.API
                     String.Join(",",
                         new object[]
                         {
-                            nameof(Player.Game), nameof(Player.Country), nameof(Player.Team), nameof(Player.Statistics)
+                            nameof(Player.Game), nameof(Player.Country), nameof(Player.Team)
                         }));
 
                 if (!getPlayer.Success)

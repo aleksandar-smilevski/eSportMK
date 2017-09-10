@@ -28,7 +28,7 @@ namespace eSportMK.MVC.API
         }
 
         // GET: api/Users
-        [HttpGet]
+        [HttpGet("all")]
         public IEnumerable<UserDto> GetApplicationUser()
         {
             return _userManager.Users.Select(x => new UserDto() { Id = x.Id, UserName = x.UserName, Email = x.Email}).ToList();

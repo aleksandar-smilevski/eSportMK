@@ -1,17 +1,18 @@
 ﻿using System;
+using eSportMK.MVC.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using eSportMK.MVC.Database;
 using eSportMK.MVC.Models;
 
 namespace eSportMK.MVC.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170909144127_tourneyLocation")]
+    partial class tourneyLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2")
@@ -269,9 +270,9 @@ namespace eSportMK.MVC.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<int>("GameId");
+                    b.Property<int?>("GameId");
 
-                    b.Property<int?>("LocationId");
+                    b.Property<int>("LocationId");
 
                     b.Property<string>("Name");
 
@@ -398,7 +399,7 @@ namespace eSportMK.MVC.Migrations
             modelBuilder.Entity("eSportMK.MVC.Models.Match", b =>
                 {
                     b.HasOne("eSportMK.MVC.Models.Game", "Game")
-                        .WithMany()
+                        .WithMany("Matches")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -460,7 +461,7 @@ namespace eSportMK.MVC.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("eSportMK.MVC.Models.Game", "Game")
-                        .WithMany()
+                        .WithMany("Teams")
                         .HasForeignKey("GameId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
@@ -481,13 +482,13 @@ namespace eSportMK.MVC.Migrations
             modelBuilder.Entity("eSportMK.MVC.Models.Tournament", b =>
                 {
                     b.HasOne("eSportMK.MVC.Models.Game", "Game")
-                        .WithMany()
-                        .HasForeignKey("GameId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .WithMany("Tournaments")
+                        .HasForeignKey("GameId");
 
                     b.HasOne("eSportMK.MVC.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationId");
+                        .WithMany("Tournaments")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityRoleClaim<string>", b =>
